@@ -5,15 +5,46 @@ use rand::prelude::*;
 
 use crate::base::*;
 
-type BoardElement = u8;
-
-// The board is represented as an array of arrays
-type Board = [[BoardElement; BOARD_SIZE]; BOARD_SIZE];
-
-/// Implements the 2048 game model with the board defined as an array 
-#[derive(Debug)]
+/// Implements the 2048 game model with the board defined as an array of arrays 
+#[derive(Debug, Copy, Clone)]
 pub struct Matrix {
-    board: Board,
+    board: MatrixBoard,
+}
+
+impl Matrix {
+    fn move_left(&mut self) {
+        for row in 0..4 {
+            let mut first_empty: Option<usize> = None;
+            let mut potential_merge: Option<usize> = None;
+            for col in 0..4 {
+                let value = self.board[row][col];
+    
+                if let Some(p_ind) = potential_merge {
+                    let p_value = self.board[row][p_ind];
+                    if p_value == value {
+                        self.board[row][p_ind] += value;
+                        self.board[row][col] = 0;
+                        first_empty = Some(col);
+                    }
+                }
+    
+                let value = self.board[row][col];
+    
+                if value == 0 && first_empty == None {
+                    first_empty = Some(col);
+                } else if value != 0 {
+                    if let Some(target) = first_empty {
+                        self.board[row][target] = value;
+                        self.board[row][col] = 0;
+                        first_empty = Some(target + 1);
+                        potential_merge = Some(target);
+                    } else {
+                        potential_merge = Some(col);
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl From<MatrixBoard> for Matrix {
