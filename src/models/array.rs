@@ -4,12 +4,7 @@
 
 use rand::prelude::*;
 
-// Type of the board elements
-type BoardElement = u8;
-
-// The board is represented as an array
-type ArrayBoard = [BoardElement; 16];
-type ArrayBoardIndex = [usize; 16];
+use crate::base::{ ArrayBoard, ArrayBoardIndex};
 
 /// Implements the 2048 game model with the board defined as an array 
 #[derive(Debug)]
@@ -23,7 +18,7 @@ impl ArrayModel {
     /// # Examples
     /// 
     /// ```
-    /// use game_2048::models::ArrayModel;
+    /// use game_2048_model::models::ArrayModel;
     /// 
     /// let game = ArrayModel::new();
     /// ```
@@ -39,7 +34,7 @@ impl ArrayModel {
     /// # Examples
     /// 
     /// ```
-    /// use game_2048::models::ArrayModel;
+    /// use game_2048_model::models::ArrayModel;
     /// 
     /// let mut game = ArrayModel::new();
     /// let array = [
@@ -61,7 +56,7 @@ impl ArrayModel {
     /// # Examples
     /// 
     /// ```
-    /// use game_2048::models::ArrayModel;
+    /// use game_2048_model::models::ArrayModel;
     /// 
     /// let mut game = ArrayModel::new();
     /// let array = [
@@ -86,7 +81,7 @@ impl ArrayModel {
     /// # Examples
     /// 
     /// ```
-    /// use game_2048::models::ArrayModel;
+    /// use game_2048_model::models::ArrayModel;
     /// use rand::thread_rng;
     /// 
     /// let mut game = ArrayModel::new();
@@ -105,7 +100,7 @@ impl ArrayModel {
     /// # Examples
     /// 
     /// ```
-    /// use game_2048::models::ArrayModel;
+    /// use game_2048_model::models::ArrayModel;
     /// use rand::thread_rng;
     /// 
     /// let mut game = ArrayModel::new();
@@ -126,15 +121,15 @@ impl ArrayModel {
     /// ```
     /// 
     pub fn move_left(&mut self) {
-        let index = [
+        const INDEX: ArrayBoardIndex = [
             0, 1, 2, 3,
             4, 5, 6, 7,
             8, 9, 10, 11,
             12, 13, 14, 15
         ];
-        ArrayModel::shift(&mut self.board, index);
-        ArrayModel::merge(&mut self.board, index);
-        ArrayModel::shift(&mut self.board, index);
+        ArrayModel::shift(&mut self.board, INDEX);
+        ArrayModel::merge(&mut self.board, INDEX);
+        ArrayModel::shift(&mut self.board, INDEX);
     }
 
     /// Move and merge numbers towards the right
@@ -142,7 +137,7 @@ impl ArrayModel {
     /// # Examples
     /// 
     /// ```
-    /// use game_2048::models::ArrayModel;
+    /// use game_2048_model::models::ArrayModel;
     /// use rand::thread_rng;
     /// 
     /// let mut game = ArrayModel::new();
@@ -163,15 +158,15 @@ impl ArrayModel {
     /// ```
     /// 
     pub fn move_right(&mut self) {
-        let index = [
+        const INDEX: ArrayBoardIndex = [
             3, 2, 1, 0,
             7, 6, 5, 4,
             11, 10, 9, 8,
             15, 14, 13, 12
         ];
-        ArrayModel::shift(&mut self.board, index);
-        ArrayModel::merge(&mut self.board, index);
-        ArrayModel::shift(&mut self.board, index);
+        ArrayModel::shift(&mut self.board, INDEX);
+        ArrayModel::merge(&mut self.board, INDEX);
+        ArrayModel::shift(&mut self.board, INDEX);
     }
 
     /// Move and merge numbers towards the top
@@ -179,7 +174,7 @@ impl ArrayModel {
     /// # Examples
     /// 
     /// ```
-    /// use game_2048::models::ArrayModel;
+    /// use game_2048_model::models::ArrayModel;
     /// use rand::thread_rng;
     /// 
     /// let mut game = ArrayModel::new();
@@ -200,15 +195,15 @@ impl ArrayModel {
     /// ```
     /// 
     pub fn move_up(&mut self) {
-        let index = [
+        const INDEX: ArrayBoardIndex = [
             0, 4, 8, 12,
             1, 5, 9, 13,
             2, 6, 10, 14,
             3, 7, 11, 15
         ];
-        ArrayModel::shift(&mut self.board, index);
-        ArrayModel::merge(&mut self.board, index);
-        ArrayModel::shift(&mut self.board, index);
+        ArrayModel::shift(&mut self.board, INDEX);
+        ArrayModel::merge(&mut self.board, INDEX);
+        ArrayModel::shift(&mut self.board, INDEX);
     }
 
     /// Move and merge numbers towards the top
@@ -216,7 +211,7 @@ impl ArrayModel {
     /// # Examples
     /// 
     /// ```
-    /// use game_2048::models::ArrayModel;
+    /// use game_2048_model::models::ArrayModel;
     /// use rand::thread_rng;
     /// 
     /// let mut game = ArrayModel::new();
@@ -237,15 +232,15 @@ impl ArrayModel {
     /// ```
     ///
     pub fn move_down(&mut self) {
-        let index = [
+        const INDEX: ArrayBoardIndex = [
             12, 8, 4, 0,
             13, 9, 5, 1,
             14, 10, 6, 2,
             15, 11, 7, 3
         ];
-        ArrayModel::shift(&mut self.board, index);
-        ArrayModel::merge(&mut self.board, index);
-        ArrayModel::shift(&mut self.board, index);
+        ArrayModel::shift(&mut self.board, INDEX);
+        ArrayModel::merge(&mut self.board, INDEX);
+        ArrayModel::shift(&mut self.board, INDEX);
     }
     
     /// Used to shift non-empty elements towards one of the four sides.
