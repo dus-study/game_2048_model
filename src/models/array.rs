@@ -316,7 +316,7 @@ mod tests {
         #[test]
         fn initalize_with_board_empty() {
             let game = ArrayModel::new();
-            assert_eq!(game.board, [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(game.as_array(), [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
     }
 
@@ -332,17 +332,16 @@ mod tests {
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
             game.random(&mut rng);
-            assert_eq!(game.board, [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(game.as_array(), [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
 
         #[test]
-        fn ignores_non_zero_squares() {
-            let mut game = ArrayModel::new();
+        fn ignores_non_zero_squares() {            
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
-            game.board = [64,32,16,8,0,0,0,0,0,0,0,0,0,0,0,0];
+            let mut game = ArrayModel::from([64,32,16,8,0,0,0,0,0,0,0,0,0,0,0,0]);
             game.random(&mut rng);
-            assert_eq!(game.board, [64,32,16,8,2,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(game.as_array(), [64,32,16,8,2,0,0,0,0,0,0,0,0,0,0,0]);
         }
 
         #[test]
@@ -356,7 +355,7 @@ mod tests {
             ];
             let mut rng: StdRng = SeedableRng::from_seed(seed);
             game.random(&mut rng);
-            assert_eq!(game.board, [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(game.as_array(), [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
 
         #[test]
@@ -372,7 +371,7 @@ mod tests {
             ];
             let mut rng: StdRng = SeedableRng::from_seed(seed);
             game.random(&mut rng);
-            assert_eq!(game.board, [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(game.as_array(), [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
     }
 
@@ -397,7 +396,7 @@ mod tests {
 
             game.slide(Directions::Up);
             
-            assert_eq!(game.board, expected, "Did not properly join equal squares");
+            assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
         #[test]
@@ -418,7 +417,7 @@ mod tests {
 
             game.slide(Directions::Up);
             
-            assert_eq!(game.board, expected, "Did not properly join multiple same row equal squares");
+            assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
         #[test]
@@ -439,7 +438,7 @@ mod tests {
 
             game.slide(Directions::Up);
             
-            assert_eq!(game.board, expected, "Joined unequal squares");
+            assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
         #[test]
@@ -460,7 +459,7 @@ mod tests {
 
             game.slide(Directions::Up);
             
-            assert_eq!(game.board, expected, "Joined multiple times.");
+            assert_eq!(game.as_array(), expected, "Joined multiple times.");
         }
     }
 
@@ -485,7 +484,7 @@ mod tests {
 
             game.slide(Directions::Right);
             
-            assert_eq!(game.board, expected, "Did not properly join equal squares");
+            assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
         #[test]
@@ -506,7 +505,7 @@ mod tests {
 
             game.slide(Directions::Right);
             
-            assert_eq!(game.board, expected, "Did not properly join multiple same row equal squares");
+            assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
         #[test]
@@ -527,7 +526,7 @@ mod tests {
 
             game.slide(Directions::Right);
             
-            assert_eq!(game.board, expected, "Joined unequal squares");
+            assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
         #[test]
@@ -548,7 +547,7 @@ mod tests {
 
             game.slide(Directions::Right);
             
-            assert_eq!(game.board, expected, "Joined multiple times.");
+            assert_eq!(game.as_array(), expected, "Joined multiple times.");
         }
     }
 
@@ -573,7 +572,7 @@ mod tests {
 
             game.slide(Directions::Down);
             
-            assert_eq!(game.board, expected, "Did not properly join equal squares");
+            assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
         #[test]
@@ -594,7 +593,7 @@ mod tests {
 
             game.slide(Directions::Down);
             
-            assert_eq!(game.board, expected, "Did not properly join multiple same row equal squares");
+            assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
         #[test]
@@ -615,7 +614,7 @@ mod tests {
 
             game.slide(Directions::Down);
             
-            assert_eq!(game.board, expected, "Joined unequal squares");
+            assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
         #[test]
@@ -636,7 +635,7 @@ mod tests {
 
             game.slide(Directions::Down);
             
-            assert_eq!(game.board, expected, "Joined multiple times.");
+            assert_eq!(game.as_array(), expected, "Joined multiple times.");
         }
     }
 
@@ -661,10 +660,10 @@ mod tests {
 
             game.slide(Directions::Left);
             
-            assert_eq!(game.board[0 .. 4], expected[0 .. 4], "Did not properly join equal squares. (0 square gap)");
-            assert_eq!(game.board[4 .. 8], expected[4 .. 8], "Did not properly join equal squares. (1 square gap)");
-            assert_eq!(game.board[8 .. 12], expected[8 .. 12], "Did not properly join equal squares. (2 square gap)");
-            assert_eq!(game.board[12 .. 16], expected[12 .. 16], "Unexpected square modification");
+            assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Did not properly join equal squares. (0 square gap)");
+            assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Did not properly join equal squares. (1 square gap)");
+            assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Did not properly join equal squares. (2 square gap)");
+            assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
         #[test]
@@ -685,10 +684,10 @@ mod tests {
 
             game.slide(Directions::Left);
             
-            assert_eq!(game.board[0 .. 4], expected[0 .. 4], "Did not properly join multiple same row equal squares. (Two distinct pairs)");
-            assert_eq!(game.board[4 .. 8], expected[4 .. 8], "Did not properly join multiple same row equal squares. (Two identical pairs)");
-            assert_eq!(game.board[8 .. 12], expected[8 .. 12], "Unexpected square modification");
-            assert_eq!(game.board[12 .. 16], expected[12 .. 16], "Unexpected square modification");
+            assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Did not properly join multiple same row equal squares. (Two distinct pairs)");
+            assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Did not properly join multiple same row equal squares. (Two identical pairs)");
+            assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Unexpected square modification");
+            assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
         #[test]
@@ -709,10 +708,10 @@ mod tests {
 
             game.slide(Directions::Left);
             
-            assert_eq!(game.board[0 .. 4], expected[0 .. 4], "Joined unequal squares. (0 square gap)");
-            assert_eq!(game.board[4 .. 8], expected[4 .. 8], "Joined unequal squares. (1 square gap)");
-            assert_eq!(game.board[8 .. 12], expected[8 .. 12], "Joined unequal squares. (2 square gap)");
-            assert_eq!(game.board[12 .. 16], expected[12 .. 16], "Unexpected square modification");
+            assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Joined unequal squares. (0 square gap)");
+            assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Joined unequal squares. (1 square gap)");
+            assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Joined unequal squares. (2 square gap)");
+            assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
         #[test]
@@ -733,10 +732,10 @@ mod tests {
 
             game.slide(Directions::Left);
             
-            assert_eq!(game.board[0 .. 4], expected[0 .. 4], "Joined multiple times.");
-            assert_eq!(game.board[4 .. 8], expected[4 .. 8], "Joined multiple times.");
-            assert_eq!(game.board[8 .. 12], expected[8 .. 12], "Joined multiple times.");
-            assert_eq!(game.board[12 .. 16], expected[12 .. 16], "Unexpected square modification");
+            assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Joined multiple times.");
+            assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Joined multiple times.");
+            assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Joined multiple times.");
+            assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
     }
 }
