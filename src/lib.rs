@@ -6,26 +6,26 @@
 //! 
 //! To get started, here is an example of how to setup a new game and run the first turn.
 //! 
-//! TODO: Once this is implemented, convert to doc code
-//! 
-//! use rand::prelude::*;
-//! use game_2048_model::prelude:*;
-//! 
-//! // Inital game setup with to numbers spawned
-//! let mut game = GameModel::new();
-//! game.random();
-//! game.random();
+//! ```
+//! use rand::thread_rng;
+//! use game_2048_model::prelude::*;
+//!
+//! // Inital game setup with two numbers spawned
+//! let mut game = Matrix::new();
+//! let mut rng = thread_rng();
+//! game.random(&mut rng);
+//! game.random(&mut rng);
 //! 
 //! // The player choose a direction and the game spawns a new number
 //! game.slide(Directions::Up);
-//! game.random();
+//! game.random(&mut rng);
+//! ```
 //! 
 //! You can also load an existing game.
 //! 
-//! TODO: Once this is implemented, convert to doc code
-//! 
+//! ```
 //! use rand::prelude::*;
-//! use game_2048_model::prelude:*;
+//! use game_2048_model::prelude::*;
 //!
 //! // Load an existing game
 //! let stored_game = [
@@ -34,13 +34,15 @@
 //!     [2, 8, 4, 0],
 //!     [32, 8, 16, 4]
 //! ];
-//! let mut game = GameModel::from(stored_game);
+//! let mut game = Matrix::from(stored_game);
 //! 
 //! // The player choose a direction and the game spawns a new number
 //! game.slide(Directions::Down);
-//! 
+//! ```
 
 pub mod models;
 mod base;
 
 pub use base::*;
+
+pub mod prelude;

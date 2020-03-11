@@ -252,7 +252,7 @@ impl Model for ArrayModel {
     /// 
     fn random<R: Rng>(&mut self, rng: &mut R) {
         let square = self.board.choose_weighted_mut(rng, |item| if *item == 0 { 1 } else { 0 }).unwrap();
-        let new_value = if rng.gen_range(0, 10) > 5 { 4 } else { 2 };
+        let new_value = if rng.gen_range(0, 10) > 8 { 4 } else { 2 };
         *square = new_value;
     }
 
@@ -359,7 +359,7 @@ mod tests {
         }
 
         #[test]
-        fn sets_4_with_10_procent_chans() {
+        fn sets_4_with_10_procent_chance() {
             let mut game = ArrayModel::new();
             // This seed causes the fake randomness to repeatedly fulfil this test,
             // that is set a 4 in the first element in the array by randomly generating a 9.
