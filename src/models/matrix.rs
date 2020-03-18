@@ -401,6 +401,38 @@ mod tests {
             // assert_eq!(game.random(&mut rng).is_ok(), true);
             // assert_eq!(game.as_array(), [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
+
+        #[test]
+        fn returns_no_empty_error_on_full_board() {
+            let mut game = Matrix::from([
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1
+            ]);
+            // TODO: Replace StepRng with StdRng and SeedableRng.
+            let mut rng = StepRng::new(2, 1);
+            assert_eq!(game.random(&mut rng).is_err(), true);
+        }
+
+        #[test]
+        fn no_changes_on_no_empty_error() {
+            let mut game = Matrix::from([
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1
+            ]);
+            // TODO: Replace StepRng with StdRng and SeedableRng.
+            let mut rng = StepRng::new(2, 1);
+            assert_eq!(game.random(&mut rng).is_err(), true);
+            assert_eq!(game.as_array(), [
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1
+            ]);
+        }
     }
 
     mod slide_up {
