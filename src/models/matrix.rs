@@ -88,18 +88,18 @@ impl Model for Matrix {
     // /
     // / let mut game = Matrix::new();
     // / game.from_array([
-    // /     4,0,4,2,
+    // /     2,0,2,1,
     // /     0,0,1,1,
-    // /     4,8,8,16,
-    // /     2,2,2,2
+    // /     2,3,3,4,
+    // /     1,1,1,1
     // / ]);
     // / game.slide(Directions::Left);
     // /
     // / assert_eq!(game.to_array(), [
-    // /     8,2,0,0,
-    // /     2,0,0,0,
-    // /     4,16,16,0,
-    // /     4,4,0,0
+    // /     3,1,0,0,
+    // /     1,0,0,0,
+    // /     2,4,4,0,
+    // /     2,2,0,0
     // / ]);
     // / ```
     // /
@@ -112,26 +112,33 @@ impl Model for Matrix {
         }
     }
 
-    fn random<R: Rng>(&mut self, rng: &mut R) {
+    fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError> {
         let max: usize = self
             .as_array()
             .iter()
             .fold(0, |acc, x| acc + if *x == 0 { 1 } else { 0 });
+
+        if max == 0 {
+            return Err(NoEmptyError);
+        }
+
         let ind: usize = rng.gen_range(0, max);
 
         let mut cur_ind = 0;
-        'outer: for row in 0..4 {
-            for col in 0..4 {
+        for row in 0..BOARD_SIZE {
+            for col in 0..BOARD_SIZE {
                 if self.board[row][col] == 0 {
                     if cur_ind == ind {
                         self.board[row][col] = if rng.gen_range(0, 10) > 8 { 2 } else { 1 };
-                        break 'outer;
+                        return Ok(());
                     } else {
                         cur_ind += 1;
                     }
                 }
             }
         }
+
+        Err(NoEmptyError)
     }
 
     /// Converts the game model to a matrix as an array of arrays
@@ -365,7 +372,7 @@ mod tests {
             let mut game = Matrix::new();
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
-            game.random(&mut rng);
+            assert_eq!(game.random(&mut rng).is_ok(), true);
             assert_eq!(
                 game.as_array(),
                 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -377,7 +384,7 @@ mod tests {
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
             let mut game = Matrix::from([6, 5, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-            game.random(&mut rng);
+            assert_eq!(game.random(&mut rng).is_ok(), true);
             assert_eq!(
                 game.as_array(),
                 [6, 5, 4, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -385,14 +392,14 @@ mod tests {
         }
 
         #[test]
-        fn sets_2_with_90_procent_chans() {
+        fn sets_1_with_90_procent_chans() {
             let mut game = Matrix::new();
             let seed = [
                 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0,
             ];
             let mut rng: StdRng = SeedableRng::from_seed(seed);
-            game.random(&mut rng);
+            assert_eq!(game.random(&mut rng).is_ok(), true);
             assert_eq!(
                 game.as_array(),
                 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -401,7 +408,7 @@ mod tests {
 
         #[ignore]
         #[test]
-        fn sets_4_with_10_procent_chance() {
+        fn sets_2_with_10_procent_chance() {
             unimplemented!();
             // TODO: test not working
             // let mut game = Matrix::new();
@@ -414,60 +421,130 @@ mod tests {
             //     169, 133, 246, 52, 86, 197, 228, 114
             // ];
             // let mut rng: StdRng = SeedableRng::from_seed(seed);
-            // game.random(&mut rng);
+            // assert_eq!(game.random(&mut rng).is_ok(), true);
             // assert_eq!(game.as_array(), [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+        }
+
+        #[rustfmt::skip]
+        #[test]
+        fn returns_no_empty_error_on_full_board() {
+            let mut game = Matrix::from([
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1
+            ]);
+            // TODO: Replace StepRng with StdRng and SeedableRng.
+            let mut rng = StepRng::new(2, 1);
+            assert_eq!(game.random(&mut rng).is_err(), true);
+        }
+
+        #[rustfmt::skip]
+        #[test]
+        fn no_changes_on_no_empty_error() {
+            let mut game = Matrix::from([
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1
+            ]);
+            // TODO: Replace StepRng with StdRng and SeedableRng.
+            let mut rng = StepRng::new(2, 1);
+            assert_eq!(game.random(&mut rng).is_err(), true);
+            assert_eq!(game.as_array(), [
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1,
+                1,1,1,1
+            ]);
         }
     }
 
     mod slide_up {
         use super::{Directions, Matrix, Model};
 
+        #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
-            let mut game = Matrix::from([1, 2, 3, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0]);
+            let mut game = Matrix::from([
+                1,2,3,0,
+                1,0,0,0,
+                0,2,0,0,
+                0,0,3,0
+            ]);
 
-            let expected = [2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                2,3,4,0,
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Up);
 
-            assert_eq!(
-                game.as_array(),
-                expected,
-                "Did not properly join equal squares"
-            );
+            assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn join_multiple_equal_squares() {
-            let mut game = Matrix::from([2, 1, 0, 0, 2, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0]);
+            let mut game = Matrix::from([
+                2,1,0,0,
+                2,1,0,0,
+                1,1,0,0,
+                1,1,0,0
+            ]);
 
-            let expected = [3, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                3,2,0,0,
+                2,2,0,0,
+                0,0,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Up);
 
-            assert_eq!(
-                game.as_array(),
-                expected,
-                "Did not properly join multiple same row equal squares"
-            );
+            assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_unequal_squares() {
-            let mut game = Matrix::from([1, 2, 3, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 4, 0]);
+            let mut game = Matrix::from([
+                1,2,3,0,
+                2,0,0,0,
+                0,3,0,0,
+                0,0,4,0
+            ]);
 
-            let expected = [1, 2, 3, 0, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                1,2,3,0,
+                2,3,4,0,
+                0,0,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Up);
 
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_multiple_pairs_of_squares() {
-            let mut game = Matrix::from([1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 0, 1, 0, 0, 0]);
+            let mut game = Matrix::from([
+                1,1,2,0,
+                1,1,1,0,
+                1,2,1,0,
+                1,0,0,0
+            ]);
 
-            let expected = [2, 2, 2, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                2,2,2,0,
+                2,2,2,0,
+                0,0,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Up);
 
@@ -478,52 +555,88 @@ mod tests {
     mod slide_right {
         use super::{Directions, Matrix, Model};
 
+        #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
-            let mut game = Matrix::from([0, 0, 1, 1, 0, 2, 0, 2, 3, 0, 0, 3, 0, 0, 0, 0]);
+            let mut game = Matrix::from([
+                0,0,1,1,
+                0,2,0,2,
+                3,0,0,3,
+                0,0,0,0
+            ]);
 
-            let expected = [0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 0];
+            let expected = [
+                0,0,0,2,
+                0,0,0,3,
+                0,0,0,4,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Right);
 
-            assert_eq!(
-                game.as_array(),
-                expected,
-                "Did not properly join equal squares"
-            );
+            assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn join_multiple_equal_squares() {
-            let mut game = Matrix::from([1, 1, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]);
+            let mut game = Matrix::from([
+                1,1,2,2,
+                1,1,1,1,
+                0,0,0,0,
+                0,0,0,0
+            ]);
 
-            let expected = [0, 0, 2, 3, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                0,0,2,3,
+                0,0,2,2,
+                0,0,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Right);
 
-            assert_eq!(
-                game.as_array(),
-                expected,
-                "Did not properly join multiple same row equal squares"
-            );
+            assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_unequal_squares() {
-            let mut game = Matrix::from([0, 0, 2, 1, 0, 3, 0, 2, 4, 0, 0, 3, 0, 0, 0, 0]);
+            let mut game = Matrix::from([
+                0,0,2,1,
+                0,3,0,2,
+                4,0,0,3,
+                0,0,0,0
+            ]);
 
-            let expected = [0, 0, 2, 1, 0, 0, 3, 2, 0, 0, 4, 3, 0, 0, 0, 0];
+            let expected = [
+                0,0,2,1,
+                0,0,3,2,
+                0,0,4,3,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Right);
 
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_multiple_pairs_of_squares() {
-            let mut game = Matrix::from([1, 1, 1, 1, 0, 2, 1, 1, 0, 1, 1, 2, 0, 0, 0, 0]);
+            let mut game = Matrix::from([
+                1,1,1,1,
+                0,2,1,1,
+                0,1,1,2,
+                0,0,0,0
+            ]);
 
-            let expected = [0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 0, 0];
+            let expected = [
+                0,0,2,2,
+                0,0,2,2,
+                0,0,2,2,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Right);
 
@@ -534,52 +647,88 @@ mod tests {
     mod slide_down {
         use super::{Directions, Matrix, Model};
 
+        #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
-            let mut game = Matrix::from([0, 0, 3, 0, 0, 2, 0, 0, 1, 0, 0, 0, 1, 2, 3, 0]);
+            let mut game = Matrix::from([
+                0,0,3,0,
+                0,2,0,0,
+                1,0,0,0,
+                1,2,3,0
+            ]);
 
-            let expected = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 0];
+            let expected = [
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0,
+                2,3,4,0
+            ];
 
             game.slide(Directions::Down);
 
-            assert_eq!(
-                game.as_array(),
-                expected,
-                "Did not properly join equal squares"
-            );
+            assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn join_multiple_equal_squares() {
-            let mut game = Matrix::from([1, 1, 0, 0, 1, 1, 0, 0, 2, 1, 0, 0, 2, 1, 0, 0]);
+            let mut game = Matrix::from([
+                1,1,0,0,
+                1,1,0,0,
+                2,1,0,0,
+                2,1,0,0
+            ]);
 
-            let expected = [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 3, 2, 0, 0];
+            let expected = [
+                0,0,0,0,
+                0,0,0,0,
+                2,2,0,0,
+                3,2,0,0
+            ];
 
             game.slide(Directions::Down);
 
-            assert_eq!(
-                game.as_array(),
-                expected,
-                "Did not properly join multiple same row equal squares"
-            );
+            assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_unequal_squares() {
-            let mut game = Matrix::from([0, 0, 4, 0, 0, 3, 0, 0, 2, 0, 0, 0, 1, 2, 3, 0]);
+            let mut game = Matrix::from([
+                0,0,4,0,
+                0,3,0,0,
+                2,0,0,0,
+                1,2,3,0
+            ]);
 
-            let expected = [0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 0, 1, 2, 3, 0];
+            let expected = [
+                0,0,0,0,
+                0,0,0,0,
+                2,3,4,0,
+                1,2,3,0
+            ];
 
             game.slide(Directions::Down);
 
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_multiple_pairs_of_squares() {
-            let mut game = Matrix::from([1, 0, 0, 0, 1, 2, 1, 0, 1, 1, 1, 0, 1, 1, 2, 0]);
+            let mut game = Matrix::from([
+                1,0,0,0,
+                1,2,1,0,
+                1,1,1,0,
+                1,1,2,0
+            ]);
 
-            let expected = [0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 2, 2, 2, 0];
+            let expected = [
+                0,0,0,0,
+                0,0,0,0,
+                2,2,2,0,
+                2,2,2,0
+            ];
 
             game.slide(Directions::Down);
 
@@ -590,124 +739,104 @@ mod tests {
     mod slide_left {
         use super::{Directions, Matrix, Model};
 
+        #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
-            let mut game = Matrix::from([1, 1, 0, 0, 2, 0, 2, 0, 3, 0, 0, 3, 0, 0, 0, 0]);
+            let mut game = Matrix::from([
+                1,1,0,0,
+                2,0,2,0,
+                3,0,0,3,
+                0,0,0,0
+            ]);
 
-            let expected = [2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                2,0,0,0,
+                3,0,0,0,
+                4,0,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Left);
 
-            assert_eq!(
-                game.as_array()[0..4],
-                expected[0..4],
-                "Did not properly join equal squares. (0 square gap)"
-            );
-            assert_eq!(
-                game.as_array()[4..8],
-                expected[4..8],
-                "Did not properly join equal squares. (1 square gap)"
-            );
-            assert_eq!(
-                game.as_array()[8..12],
-                expected[8..12],
-                "Did not properly join equal squares. (2 square gap)"
-            );
-            assert_eq!(
-                game.as_array()[12..16],
-                expected[12..16],
-                "Unexpected square modification"
-            );
+            assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Did not properly join equal squares. (0 square gap)");
+            assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Did not properly join equal squares. (1 square gap)");
+            assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Did not properly join equal squares. (2 square gap)");
+            assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn join_multiple_equal_squares() {
-            let mut game = Matrix::from([2, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]);
+            let mut game = Matrix::from([
+                2,2,1,1,
+                1,1,1,1,
+                0,0,0,0,
+                0,0,0,0
+            ]);
 
-            let expected = [3, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                3,2,0,0,
+                2,2,0,0,
+                0,0,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Left);
 
-            assert_eq!(
-                game.as_array()[0..4],
-                expected[0..4],
-                "Did not properly join multiple same row equal squares. (Two distinct pairs)"
-            );
-            assert_eq!(
-                game.as_array()[4..8],
-                expected[4..8],
-                "Did not properly join multiple same row equal squares. (Two identical pairs)"
-            );
-            assert_eq!(
-                game.as_array()[8..12],
-                expected[8..12],
-                "Unexpected square modification"
-            );
-            assert_eq!(
-                game.as_array()[12..16],
-                expected[12..16],
-                "Unexpected square modification"
-            );
+            assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Did not properly join multiple same row equal squares. (Two distinct pairs)");
+            assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Did not properly join multiple same row equal squares. (Two identical pairs)");
+            assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Unexpected square modification");
+            assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_unequal_squares() {
-            let mut game = Matrix::from([1, 2, 0, 0, 2, 0, 3, 0, 3, 0, 0, 4, 0, 0, 0, 0]);
+            let mut game = Matrix::from([
+                1,2,0,0,
+                2,0,3,0,
+                3,0,0,4,
+                0,0,0,0
+            ]);
 
-            let expected = [1, 2, 0, 0, 2, 3, 0, 0, 3, 4, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                1,2,0,0,
+                2,3,0,0,
+                3,4,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Left);
 
-            assert_eq!(
-                game.as_array()[0..4],
-                expected[0..4],
-                "Joined unequal squares. (0 square gap)"
-            );
-            assert_eq!(
-                game.as_array()[4..8],
-                expected[4..8],
-                "Joined unequal squares. (1 square gap)"
-            );
-            assert_eq!(
-                game.as_array()[8..12],
-                expected[8..12],
-                "Joined unequal squares. (1 square gap)"
-            );
-            assert_eq!(
-                game.as_array()[12..16],
-                expected[12..16],
-                "Unexpected square modification"
-            );
+            assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Joined unequal squares. (0 square gap)");
+            assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Joined unequal squares. (1 square gap)");
+            assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Joined unequal squares. (2 square gap)");
+            assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_multiple_pairs_of_squares() {
-            let mut game = Matrix::from([1, 1, 1, 1, 1, 1, 2, 0, 2, 1, 1, 0, 0, 0, 0, 0]);
+            let mut game = Matrix::from([
+                1,1,1,1,
+                1,1,2,0,
+                2,1,1,0,
+                0,0,0,0
+            ]);
 
-            let expected = [2, 2, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0];
+            let expected = [
+                2,2,0,0,
+                2,2,0,0,
+                2,2,0,0,
+                0,0,0,0
+            ];
 
             game.slide(Directions::Left);
 
-            assert_eq!(
-                game.as_array()[0..4],
-                expected[0..4],
-                "Joined multiple times. 1"
-            );
-            assert_eq!(
-                game.as_array()[4..8],
-                expected[4..8],
-                "Joined multiple times. 2"
-            );
-            assert_eq!(
-                game.as_array()[8..12],
-                expected[8..12],
-                "Joined multiple times. 3"
-            );
-            assert_eq!(
-                game.as_array()[12..16],
-                expected[12..16],
-                "Unexpected square modification"
-            );
+            assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Joined multiple times. 1");
+            assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Joined multiple times. 2");
+            assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Joined multiple times. 3");
+            assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
     }
 }
