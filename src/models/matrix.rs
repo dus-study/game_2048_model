@@ -114,23 +114,30 @@ impl Model for Matrix {
         }
     }
 
-    fn random<R: Rng>(&mut self, rng: &mut R) {
+    fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError> {
         let max: usize = self.as_array().iter().fold(0, |acc, x| acc + if *x == 0 {1} else {0});
+
+        if max == 0 {
+            return Err(NoEmptyError);
+        }
+
         let ind: usize = rng.gen_range(0, max);
         
         let mut cur_ind = 0;
-        'outer: for row in 0..4 {
-            for col in 0..4 {
+        for row in 0..BOARD_SIZE {
+            for col in 0..BOARD_SIZE {
                 if self.board[row][col] == 0 {
                     if cur_ind == ind {
                         self.board[row][col] = if rng.gen_range(0, 10) > 8 { 4 } else { 2 };
-                        break 'outer;
+                        return Ok(());
                     } else {
                         cur_ind += 1;
                     }
                 }
             }
         }
+
+        Err(NoEmptyError)
     }
 
     /// Converts the game model to a matrix as an array of arrays
@@ -349,7 +356,7 @@ mod tests {
             let mut game = Matrix::new();
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
-            game.random(&mut rng);
+            assert_eq!(game.random(&mut rng).is_ok(), true);
             assert_eq!(game.as_array(), [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
 
@@ -358,7 +365,7 @@ mod tests {
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
             let mut game = Matrix::from([64,32,16,8,0,0,0,0,0,0,0,0,0,0,0,0]);
-            game.random(&mut rng);
+            assert_eq!(game.random(&mut rng).is_ok(), true);
             assert_eq!(game.as_array(), [64,32,16,8,2,0,0,0,0,0,0,0,0,0,0,0]);
         }
 
@@ -372,7 +379,7 @@ mod tests {
                 0, 0, 0, 0, 0, 0, 0, 0
             ];
             let mut rng: StdRng = SeedableRng::from_seed(seed);
-            game.random(&mut rng);
+            assert_eq!(game.random(&mut rng).is_ok(), true);
             assert_eq!(game.as_array(), [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
 
@@ -391,7 +398,7 @@ mod tests {
             //     169, 133, 246, 52, 86, 197, 228, 114
             // ];
             // let mut rng: StdRng = SeedableRng::from_seed(seed);
-            // game.random(&mut rng);
+            // assert_eq!(game.random(&mut rng).is_ok(), true);
             // assert_eq!(game.as_array(), [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
     }
