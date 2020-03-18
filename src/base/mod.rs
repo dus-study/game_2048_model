@@ -1,4 +1,7 @@
+mod no_empty_error;
+
 use rand::prelude::*;
+pub use no_empty_error::NoEmptyError;
 
 pub const BOARD_SIZE: usize = 4;
 
@@ -22,7 +25,7 @@ pub trait Model: From<MatrixBoard> + From<ArrayBoard> {
 
     fn slide(&mut self, direction: Directions);
 
-    fn random<R: Rng>(&mut self, rng: &mut R);
+    fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError>;
 
     fn as_matrix(&self) -> MatrixBoard;
 
