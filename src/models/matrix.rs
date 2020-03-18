@@ -28,9 +28,7 @@ impl From<MatrixBoard> for Matrix {
     /// ```
     ///
     fn from(board: MatrixBoard) -> Self {
-        Matrix {
-            board: board
-        }
+        Matrix { board: board }
     }
 }
 
@@ -57,8 +55,8 @@ impl From<ArrayBoard> for Matrix {
                 [board[0], board[1], board[2], board[3]],
                 [board[4], board[5], board[6], board[7]],
                 [board[8], board[9], board[10], board[11]],
-                [board[12], board[13], board[14], board[15]]
-            ]
+                [board[12], board[13], board[14], board[15]],
+            ],
         }
     }
 }
@@ -76,7 +74,7 @@ impl Model for Matrix {
     ///
     fn new() -> Matrix {
         Matrix {
-            board: [[0; BOARD_SIZE]; BOARD_SIZE]
+            board: [[0; BOARD_SIZE]; BOARD_SIZE],
         }
     }
 
@@ -90,18 +88,18 @@ impl Model for Matrix {
     // /
     // / let mut game = Matrix::new();
     // / game.from_array([
-    // /     4,0,4,2,
+    // /     2,0,2,1,
     // /     0,0,1,1,
-    // /     4,8,8,16,
-    // /     2,2,2,2
+    // /     2,3,3,4,
+    // /     1,1,1,1
     // / ]);
     // / game.slide(Directions::Left);
     // /
     // / assert_eq!(game.to_array(), [
-    // /     8,2,0,0,
-    // /     2,0,0,0,
-    // /     4,16,16,0,
-    // /     4,4,0,0
+    // /     3,1,0,0,
+    // /     1,0,0,0,
+    // /     2,4,4,0,
+    // /     2,2,0,0
     // / ]);
     // / ```
     // /
@@ -115,7 +113,10 @@ impl Model for Matrix {
     }
 
     fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError> {
-        let max: usize = self.as_array().iter().fold(0, |acc, x| acc + if *x == 0 {1} else {0});
+        let max: usize = self
+            .as_array()
+            .iter()
+            .fold(0, |acc, x| acc + if *x == 0 { 1 } else { 0 });
 
         if max == 0 {
             return Err(NoEmptyError);
@@ -128,7 +129,7 @@ impl Model for Matrix {
             for col in 0..BOARD_SIZE {
                 if self.board[row][col] == 0 {
                     if cur_ind == ind {
-                        self.board[row][col] = if rng.gen_range(0, 10) > 8 { 4 } else { 2 };
+                        self.board[row][col] = if rng.gen_range(0, 10) > 8 { 2 } else { 1 };
                         return Ok(());
                     } else {
                         cur_ind += 1;
@@ -181,10 +182,22 @@ impl Model for Matrix {
     fn as_array(&self) -> ArrayBoard {
         // TODO: Convert to macro
         [
-            self.board[0][0], self.board[0][1], self.board[0][2], self.board[0][3],
-            self.board[1][0], self.board[1][1], self.board[1][2], self.board[1][3],
-            self.board[2][0], self.board[2][1], self.board[2][2], self.board[2][3],
-            self.board[3][0], self.board[3][1], self.board[3][2], self.board[3][3]
+            self.board[0][0],
+            self.board[0][1],
+            self.board[0][2],
+            self.board[0][3],
+            self.board[1][0],
+            self.board[1][1],
+            self.board[1][2],
+            self.board[1][3],
+            self.board[2][0],
+            self.board[2][1],
+            self.board[2][2],
+            self.board[2][3],
+            self.board[3][0],
+            self.board[3][1],
+            self.board[3][2],
+            self.board[3][3],
         ]
     }
 }
@@ -200,7 +213,7 @@ impl Matrix {
                 if let Some(p_ind) = potential_merge {
                     let p_value = self.board[p_ind][col];
                     if p_value == value {
-                        self.board[p_ind][col] += value;
+                        self.board[p_ind][col] += 1;
                         self.board[row][col] = 0;
                         first_empty = Some(row);
                         potential_merge = None;
@@ -235,7 +248,7 @@ impl Matrix {
                 if let Some(p_ind) = potential_merge {
                     let p_value = self.board[row][p_ind];
                     if p_value == value {
-                        self.board[row][p_ind] += value;
+                        self.board[row][p_ind] += 1;
                         self.board[row][col] = 0;
                         first_empty = Some(col);
                         potential_merge = None;
@@ -270,7 +283,7 @@ impl Matrix {
                 if let Some(p_ind) = potential_merge {
                     let p_value = self.board[p_ind][col];
                     if p_value == value {
-                        self.board[p_ind][col] += value;
+                        self.board[p_ind][col] += 1;
                         self.board[row][col] = 0;
                         first_empty = Some(row);
                         potential_merge = None;
@@ -305,7 +318,7 @@ impl Matrix {
                 if let Some(p_ind) = potential_merge {
                     let p_value = self.board[row][p_ind];
                     if p_value == value {
-                        self.board[row][p_ind] += value;
+                        self.board[row][p_ind] += 1;
                         self.board[row][col] = 0;
                         first_empty = Some(col);
                         potential_merge = None;
@@ -333,7 +346,7 @@ impl Matrix {
 
 #[cfg(test)]
 mod tests {
-    use super::{Matrix, Directions, Model};
+    use super::{Directions, Matrix, Model};
 
     mod new {
         use super::{Matrix, Model};
@@ -341,15 +354,18 @@ mod tests {
         #[test]
         fn initalize_with_board_empty() {
             let game = Matrix::new();
-            assert_eq!(game.as_array(), [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(
+                game.as_array(),
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            );
         }
     }
 
     mod random {
         use super::{Matrix, Model};
         use rand::rngs::mock::StepRng;
-        use rand::{SeedableRng};
         use rand::rngs::StdRng;
+        use rand::SeedableRng;
 
         #[test]
         fn updates_a_zero_square() {
@@ -357,35 +373,42 @@ mod tests {
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
             assert_eq!(game.random(&mut rng).is_ok(), true);
-            assert_eq!(game.as_array(), [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(
+                game.as_array(),
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            );
         }
 
         #[test]
         fn ignores_non_zero_squares() {
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
-            let mut game = Matrix::from([64,32,16,8,0,0,0,0,0,0,0,0,0,0,0,0]);
+            let mut game = Matrix::from([6, 5, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
             assert_eq!(game.random(&mut rng).is_ok(), true);
-            assert_eq!(game.as_array(), [64,32,16,8,2,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(
+                game.as_array(),
+                [6, 5, 4, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            );
         }
 
         #[test]
-        fn sets_2_with_90_procent_chans() {
+        fn sets_1_with_90_procent_chans() {
             let mut game = Matrix::new();
             let seed = [
-                64, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0
+                64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
             ];
             let mut rng: StdRng = SeedableRng::from_seed(seed);
             assert_eq!(game.random(&mut rng).is_ok(), true);
-            assert_eq!(game.as_array(), [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+            assert_eq!(
+                game.as_array(),
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            );
         }
 
         #[ignore]
         #[test]
-        fn sets_4_with_10_procent_chance() {
+        fn sets_2_with_10_procent_chance() {
             unimplemented!();
             // TODO: test not working
             // let mut game = Matrix::new();
@@ -402,6 +425,7 @@ mod tests {
             // assert_eq!(game.as_array(), [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
         }
 
+        #[rustfmt::skip]
         #[test]
         fn returns_no_empty_error_on_full_board() {
             let mut game = Matrix::from([
@@ -415,6 +439,7 @@ mod tests {
             assert_eq!(game.random(&mut rng).is_err(), true);
         }
 
+        #[rustfmt::skip]
         #[test]
         fn no_changes_on_no_empty_error() {
             let mut game = Matrix::from([
@@ -436,19 +461,20 @@ mod tests {
     }
 
     mod slide_up {
-        use super::{Matrix, Directions, Model};
+        use super::{Directions, Matrix, Model};
 
+        #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
             let mut game = Matrix::from([
-                2,4,8,0,
-                2,0,0,0,
-                0,4,0,0,
-                0,0,8,0
+                1,2,3,0,
+                1,0,0,0,
+                0,2,0,0,
+                0,0,3,0
             ]);
 
             let expected = [
-                4,8,16,0,
+                2,3,4,0,
                 0,0,0,0,
                 0,0,0,0,
                 0,0,0,0
@@ -459,18 +485,19 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn join_multiple_equal_squares() {
             let mut game = Matrix::from([
-                4,2,0,0,
-                4,2,0,0,
-                2,2,0,0,
-                2,2,0,0
+                2,1,0,0,
+                2,1,0,0,
+                1,1,0,0,
+                1,1,0,0
             ]);
 
             let expected = [
-                8,4,0,0,
-                4,4,0,0,
+                3,2,0,0,
+                2,2,0,0,
                 0,0,0,0,
                 0,0,0,0
             ];
@@ -480,18 +507,19 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_unequal_squares() {
             let mut game = Matrix::from([
-                2,4,8,0,
-                4,0,0,0,
-                0,8,0,0,
-                0,0,16,0
+                1,2,3,0,
+                2,0,0,0,
+                0,3,0,0,
+                0,0,4,0
             ]);
 
             let expected = [
-                2,4,8,0,
-                4,8,16,0,
+                1,2,3,0,
+                2,3,4,0,
                 0,0,0,0,
                 0,0,0,0
             ];
@@ -501,18 +529,19 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_multiple_pairs_of_squares() {
             let mut game = Matrix::from([
-                2,2,4,0,
-                2,2,2,0,
-                2,4,2,0,
-                2,0,0,0
+                1,1,2,0,
+                1,1,1,0,
+                1,2,1,0,
+                1,0,0,0
             ]);
 
             let expected = [
-                4,4,4,0,
-                4,4,4,0,
+                2,2,2,0,
+                2,2,2,0,
                 0,0,0,0,
                 0,0,0,0
             ];
@@ -524,21 +553,22 @@ mod tests {
     }
 
     mod slide_right {
-        use super::{Matrix, Directions, Model};
+        use super::{Directions, Matrix, Model};
 
+        #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
             let mut game = Matrix::from([
-                0,0,2,2,
-                0,4,0,4,
-                8,0,0,8,
+                0,0,1,1,
+                0,2,0,2,
+                3,0,0,3,
                 0,0,0,0
             ]);
 
             let expected = [
+                0,0,0,2,
+                0,0,0,3,
                 0,0,0,4,
-                0,0,0,8,
-                0,0,0,16,
                 0,0,0,0
             ];
 
@@ -547,18 +577,19 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn join_multiple_equal_squares() {
             let mut game = Matrix::from([
-                2,2,4,4,
-                2,2,2,2,
+                1,1,2,2,
+                1,1,1,1,
                 0,0,0,0,
                 0,0,0,0
             ]);
 
             let expected = [
-                0,0,4,8,
-                0,0,4,4,
+                0,0,2,3,
+                0,0,2,2,
                 0,0,0,0,
                 0,0,0,0
             ];
@@ -568,19 +599,20 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_unequal_squares() {
             let mut game = Matrix::from([
-                0,0,4,2,
-                0,8,0,4,
-                16,0,0,8,
+                0,0,2,1,
+                0,3,0,2,
+                4,0,0,3,
                 0,0,0,0
             ]);
 
             let expected = [
-                0,0,4,2,
-                0,0,8,4,
-                0,0,16,8,
+                0,0,2,1,
+                0,0,3,2,
+                0,0,4,3,
                 0,0,0,0
             ];
 
@@ -589,19 +621,20 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_multiple_pairs_of_squares() {
             let mut game = Matrix::from([
-                2,2,2,2,
-                0,4,2,2,
-                0,2,2,4,
+                1,1,1,1,
+                0,2,1,1,
+                0,1,1,2,
                 0,0,0,0
             ]);
 
             let expected = [
-                0,0,4,4,
-                0,0,4,4,
-                0,0,4,4,
+                0,0,2,2,
+                0,0,2,2,
+                0,0,2,2,
                 0,0,0,0
             ];
 
@@ -612,22 +645,23 @@ mod tests {
     }
 
     mod slide_down {
-        use super::{Matrix, Directions, Model};
+        use super::{Directions, Matrix, Model};
 
+        #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
             let mut game = Matrix::from([
-                0,0,8,0,
-                0,4,0,0,
-                2,0,0,0,
-                2,4,8,0
+                0,0,3,0,
+                0,2,0,0,
+                1,0,0,0,
+                1,2,3,0
             ]);
 
             let expected = [
                 0,0,0,0,
                 0,0,0,0,
                 0,0,0,0,
-                4,8,16,0
+                2,3,4,0
             ];
 
             game.slide(Directions::Down);
@@ -635,20 +669,21 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn join_multiple_equal_squares() {
             let mut game = Matrix::from([
-                2,2,0,0,
-                2,2,0,0,
-                4,2,0,0,
-                4,2,0,0
+                1,1,0,0,
+                1,1,0,0,
+                2,1,0,0,
+                2,1,0,0
             ]);
 
             let expected = [
                 0,0,0,0,
                 0,0,0,0,
-                4,4,0,0,
-                8,4,0,0
+                2,2,0,0,
+                3,2,0,0
             ];
 
             game.slide(Directions::Down);
@@ -656,20 +691,21 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_unequal_squares() {
             let mut game = Matrix::from([
-                0,0,16,0,
-                0,8,0,0,
-                4,0,0,0,
-                2,4,8,0
+                0,0,4,0,
+                0,3,0,0,
+                2,0,0,0,
+                1,2,3,0
             ]);
 
             let expected = [
                 0,0,0,0,
                 0,0,0,0,
-                4,8,16,0,
-                2,4,8,0
+                2,3,4,0,
+                1,2,3,0
             ];
 
             game.slide(Directions::Down);
@@ -677,20 +713,21 @@ mod tests {
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_multiple_pairs_of_squares() {
             let mut game = Matrix::from([
-                2,0,0,0,
-                2,4,2,0,
-                2,2,2,0,
-                2,2,4,0
+                1,0,0,0,
+                1,2,1,0,
+                1,1,1,0,
+                1,1,2,0
             ]);
 
             let expected = [
                 0,0,0,0,
                 0,0,0,0,
-                4,4,4,0,
-                4,4,4,0
+                2,2,2,0,
+                2,2,2,0
             ];
 
             game.slide(Directions::Down);
@@ -700,21 +737,22 @@ mod tests {
     }
 
     mod slide_left {
-        use super::{Matrix, Directions, Model};
+        use super::{Directions, Matrix, Model};
 
+        #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
             let mut game = Matrix::from([
-                2,2,0,0,
-                4,0,4,0,
-                8,0,0,8,
+                1,1,0,0,
+                2,0,2,0,
+                3,0,0,3,
                 0,0,0,0
             ]);
 
             let expected = [
+                2,0,0,0,
+                3,0,0,0,
                 4,0,0,0,
-                8,0,0,0,
-                16,0,0,0,
                 0,0,0,0
             ];
 
@@ -726,18 +764,19 @@ mod tests {
             assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn join_multiple_equal_squares() {
             let mut game = Matrix::from([
-                4,4,2,2,
-                2,2,2,2,
+                2,2,1,1,
+                1,1,1,1,
                 0,0,0,0,
                 0,0,0,0
             ]);
 
             let expected = [
-                8,4,0,0,
-                4,4,0,0,
+                3,2,0,0,
+                2,2,0,0,
                 0,0,0,0,
                 0,0,0,0
             ];
@@ -750,19 +789,20 @@ mod tests {
             assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_unequal_squares() {
             let mut game = Matrix::from([
-                2,4,0,0,
-                4,0,8,0,
-                8,0,0,16,
+                1,2,0,0,
+                2,0,3,0,
+                3,0,0,4,
                 0,0,0,0
             ]);
 
             let expected = [
-                2,4,0,0,
-                4,8,0,0,
-                8,16,0,0,
+                1,2,0,0,
+                2,3,0,0,
+                3,4,0,0,
                 0,0,0,0
             ];
 
@@ -774,19 +814,20 @@ mod tests {
             assert_eq!(game.as_array()[12 .. 16], expected[12 .. 16], "Unexpected square modification");
         }
 
+        #[rustfmt::skip]
         #[test]
         fn do_not_join_multiple_pairs_of_squares() {
             let mut game = Matrix::from([
-                2,2,2,2,
-                2,2,4,0,
-                4,2,2,0,
+                1,1,1,1,
+                1,1,2,0,
+                2,1,1,0,
                 0,0,0,0
             ]);
 
             let expected = [
-                4,4,0,0,
-                4,4,0,0,
-                4,4,0,0,
+                2,2,0,0,
+                2,2,0,0,
+                2,2,0,0,
                 0,0,0,0
             ];
 
