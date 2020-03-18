@@ -245,7 +245,7 @@ impl Model for ArrayModel {
             .board
             .choose_weighted_mut(rng, |item| if *item == 0 { 1 } else { 0 })
             .unwrap();
-        let new_value = if rng.gen_range(0, 10) > 8 { 4 } else { 2 };
+        let new_value = if rng.gen_range(0, 10) > 8 { 2 } else { 1 };
         *square = new_value;
     }
 
@@ -335,7 +335,7 @@ mod tests {
             game.random(&mut rng);
             assert_eq!(
                 game.as_array(),
-                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             );
         }
 
@@ -343,11 +343,11 @@ mod tests {
         fn ignores_non_zero_squares() {
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
-            let mut game = ArrayModel::from([64, 32, 16, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+            let mut game = ArrayModel::from([6, 5, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
             game.random(&mut rng);
             assert_eq!(
                 game.as_array(),
-                [64, 32, 16, 8, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                [6, 5, 4, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             );
         }
 
@@ -362,7 +362,7 @@ mod tests {
             game.random(&mut rng);
             assert_eq!(
                 game.as_array(),
-                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             );
         }
 
@@ -379,7 +379,7 @@ mod tests {
             game.random(&mut rng);
             assert_eq!(
                 game.as_array(),
-                [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             );
         }
     }
