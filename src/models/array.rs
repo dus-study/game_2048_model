@@ -5,7 +5,7 @@ use rand::prelude::*;
 
 use crate::base::*;
 
-/// Implements the 2048 game model with the board defined as an array 
+/// Implements the 2048 game model with the board defined as an array
 #[derive(Debug, Copy, Clone)]
 pub struct ArrayModel {
     board: ArrayBoard,
@@ -41,16 +41,16 @@ pub const LEFT_INDEX: ArrayBoardIndex = [
 
 impl ArrayModel {
     /// Used to shift non-empty elements towards one of the four sides.
-    /// 
+    ///
     /// This is a private method not intended to be used directly.
     /// The method allways shifts towards the left, the index defines what
     /// the method considers left.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `array` - The board to shift
     /// * `index` - Defines in what direction the method acts.
-    /// 
+    ///
     fn shift(array: &mut ArrayBoard, index: ArrayBoardIndex) {
         for outer_i in (0..16).step_by(4) {
             let mut movable: Option<usize> = None;
@@ -71,31 +71,31 @@ impl ArrayModel {
     }
 
     /// Used to merge elements towards one of the four sides.
-    /// 
+    ///
     /// This is a private method not intended to be used directly.
     /// The method allways merge towards the left, the index defines what
     /// the method considers left.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `array` - The board to shift
     /// * `index` - Defines in what direction the method acts.
-    /// 
+    ///
     fn merge(array: &mut ArrayBoard, index: ArrayBoardIndex) {
         for outer_i in (0..16).step_by(4) {
             let mut mergeable: Option<usize> = None;
             for inner_i in outer_i..(outer_i + 4) {
                 let ind = index[inner_i];
                 let value = array[ind as usize];
-                
+
                 if value == 0 {
                     break;
                 }
-                
+
                 if let Some(merge_to) = mergeable {
                     let prev_ind = index[merge_to];
                     let prev_value = array[prev_ind];
-                    
+
                     if value == prev_value && merge_to + 1 == inner_i {
                         array[prev_ind] += value;
                         array[ind] = 0;
@@ -116,19 +116,19 @@ impl ArrayModel {
 impl From<MatrixBoard> for ArrayModel {
     /// ```
     /// use game_2048_model::models::{Model, Matrix};
-    /// 
+    ///
     /// let input = [
     ///  [0,1,1,0],
     ///  [1,2,2,1],
     ///  [1,2,2,1],
     ///  [0,1,1,0]
     /// ];
-    /// 
+    ///
     /// let game = Matrix::from(input);
-    /// 
+    ///
     /// assert_eq!(game.as_matrix(), input);
     /// ```
-    /// 
+    ///
     fn from(board: MatrixBoard) -> Self {
         // TODO: Implement macro
         ArrayModel {
@@ -144,23 +144,23 @@ impl From<MatrixBoard> for ArrayModel {
 
 impl From<ArrayBoard> for ArrayModel {
     /// Sets the board state based on the given array
-    /// 
+    ///
     /// # Examples
     /// ```
     /// use game_2048_model::models::{Model, ArrayModel};
-    /// 
+    ///
     /// let input = [
     ///     0,1,1,0,
     ///     1,2,2,1,
     ///     1,2,2,1,
     ///     0,1,1,0
     /// ];
-    /// 
+    ///
     /// let game = ArrayModel::from(input);
-    /// 
+    ///
     /// assert_eq!(game.as_array(), input);
     /// ```
-    /// 
+    ///
     fn from(board: ArrayBoard) -> Self {
         ArrayModel {
             board: board
@@ -170,15 +170,15 @@ impl From<ArrayBoard> for ArrayModel {
 
 impl Model for ArrayModel {
     /// Create a new instance of the game board filled with zeros
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use game_2048_model::models::{Model, ArrayModel};
-    /// 
+    ///
     /// let game = ArrayModel::new();
     /// ```
-    /// 
+    ///
     fn new() -> ArrayModel {
         ArrayModel {
             board: [0; BOARD_SIZE * BOARD_SIZE],
@@ -186,13 +186,13 @@ impl Model for ArrayModel {
     }
 
     /// Slide and merge the numbers towards a direction
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use game_2048_model::models::{ArrayModel, Directions, Model};
     /// use rand::thread_rng;
-    /// 
+    ///
     /// let mut game = ArrayModel::from([
     ///     2,1,16,2,
     ///     4,1,8,2,
@@ -200,7 +200,7 @@ impl Model for ArrayModel {
     ///     4,0,4,2
     /// ]);
     /// game.slide(Directions::Down);
-    /// 
+    ///
     /// assert_eq!(game.as_array(), [
     ///     0,0,0,0,
     ///     0,0,16,0,
@@ -235,21 +235,21 @@ impl Model for ArrayModel {
     }
 
     /// Add a number to a random empty square.
-    /// 
+    ///
     /// A square is considered empty if it contains a 0.
     /// There is a 90% chance of the number added being a 2 and a 10% chance of it being a 4.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use game_2048_model::models::{Model, ArrayModel};
     /// use rand::thread_rng;
-    /// 
+    ///
     /// let mut game = ArrayModel::new();
     /// let mut rng = thread_rng();
     /// assert_eq!(game.random(&mut rng).is_ok(), true);
     /// ```
-    /// 
+    ///
     fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError> {
         let max: usize = self.board.iter().fold(0, |acc, x| acc + if *x == 0 {1} else {0});
 
@@ -258,7 +258,7 @@ impl Model for ArrayModel {
         }
 
         let ind: usize = rng.gen_range(0, max);
-        
+
         let mut cur_ind = 0;
         for elm_ind in 0..self.board.len() {
             if self.board[elm_ind] == 0 {
@@ -275,22 +275,22 @@ impl Model for ArrayModel {
     }
 
     /// Converts the game model to a matrix as an array of arrays
-    /// 
+    ///
     /// ```
     /// use game_2048_model::models::{Model, ArrayModel};
-    /// 
+    ///
     /// let input = [
     ///  [0,1,1,0],
     ///  [1,2,2,1],
     ///  [1,2,2,1],
     ///  [0,1,1,0]
     /// ];
-    /// 
+    ///
     /// let game = ArrayModel::from(input);
-    /// 
+    ///
     /// assert_eq!(game.as_matrix(), input);
     /// ```
-    /// 
+    ///
     fn as_matrix(&self) -> MatrixBoard {
         // TODO: Convert to macro
         [
@@ -302,23 +302,23 @@ impl Model for ArrayModel {
     }
 
     /// Returns the board in array form
-    /// 
+    ///
     /// # Examples
     /// ```
     /// use game_2048_model::models::{Model, ArrayModel};
-    /// 
+    ///
     /// let input = [
     ///     0,1,1,0,
     ///     1,2,2,1,
     ///     1,2,2,1,
     ///     0,1,1,0
     /// ];
-    /// 
+    ///
     /// let game = ArrayModel::from(input);
-    /// 
+    ///
     /// assert_eq!(game.as_array(), input);
     /// ```
-    /// 
+    ///
     fn as_array(&self) -> ArrayBoard {
         self.board
     }
@@ -354,7 +354,7 @@ mod tests {
         }
 
         #[test]
-        fn ignores_non_zero_squares() {            
+        fn ignores_non_zero_squares() {
             // TODO: Replace StepRng with StdRng and SeedableRng.
             let mut rng = StepRng::new(2, 1);
             let mut game = ArrayModel::from([64,32,16,8,0,0,0,0,0,0,0,0,0,0,0,0]);
@@ -438,7 +438,7 @@ mod tests {
                 0,4,0,0,
                 0,0,8,0
             ]);
-            
+
             let expected = [
                 4,8,16,0,
                 0,0,0,0,
@@ -447,7 +447,7 @@ mod tests {
             ];
 
             game.slide(Directions::Up);
-            
+
             assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
@@ -459,7 +459,7 @@ mod tests {
                 2,2,0,0,
                 2,2,0,0
             ]);
-            
+
             let expected = [
                 8,4,0,0,
                 4,4,0,0,
@@ -468,7 +468,7 @@ mod tests {
             ];
 
             game.slide(Directions::Up);
-            
+
             assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
@@ -480,7 +480,7 @@ mod tests {
                 0,8,0,0,
                 0,0,16,0
             ]);
-            
+
             let expected = [
                 2,4,8,0,
                 4,8,16,0,
@@ -489,7 +489,7 @@ mod tests {
             ];
 
             game.slide(Directions::Up);
-            
+
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
@@ -501,7 +501,7 @@ mod tests {
                 2,4,2,0,
                 2,0,0,0
             ]);
-            
+
             let expected = [
                 4,4,4,0,
                 4,4,4,0,
@@ -510,7 +510,7 @@ mod tests {
             ];
 
             game.slide(Directions::Up);
-            
+
             assert_eq!(game.as_array(), expected, "Joined multiple times.");
         }
     }
@@ -526,7 +526,7 @@ mod tests {
                 8,0,0,8,
                 0,0,0,0
             ]);
-            
+
             let expected = [
                 0,0,0,4,
                 0,0,0,8,
@@ -535,7 +535,7 @@ mod tests {
             ];
 
             game.slide(Directions::Right);
-            
+
             assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
@@ -547,7 +547,7 @@ mod tests {
                 0,0,0,0,
                 0,0,0,0
             ]);
-            
+
             let expected = [
                 0,0,4,8,
                 0,0,4,4,
@@ -556,7 +556,7 @@ mod tests {
             ];
 
             game.slide(Directions::Right);
-            
+
             assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
@@ -568,7 +568,7 @@ mod tests {
                 16,0,0,8,
                 0,0,0,0
             ]);
-            
+
             let expected = [
                 0,0,4,2,
                 0,0,8,4,
@@ -577,7 +577,7 @@ mod tests {
             ];
 
             game.slide(Directions::Right);
-            
+
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
@@ -589,7 +589,7 @@ mod tests {
                 0,2,2,4,
                 0,0,0,0
             ]);
-            
+
             let expected = [
                 0,0,4,4,
                 0,0,4,4,
@@ -598,7 +598,7 @@ mod tests {
             ];
 
             game.slide(Directions::Right);
-            
+
             assert_eq!(game.as_array(), expected, "Joined multiple times.");
         }
     }
@@ -614,7 +614,7 @@ mod tests {
                 2,0,0,0,
                 2,4,8,0
             ]);
-            
+
             let expected = [
                 0,0,0,0,
                 0,0,0,0,
@@ -623,7 +623,7 @@ mod tests {
             ];
 
             game.slide(Directions::Down);
-            
+
             assert_eq!(game.as_array(), expected, "Did not properly join equal squares");
         }
 
@@ -635,7 +635,7 @@ mod tests {
                 4,2,0,0,
                 4,2,0,0
             ]);
-            
+
             let expected = [
                 0,0,0,0,
                 0,0,0,0,
@@ -644,7 +644,7 @@ mod tests {
             ];
 
             game.slide(Directions::Down);
-            
+
             assert_eq!(game.as_array(), expected, "Did not properly join multiple same row equal squares");
         }
 
@@ -656,7 +656,7 @@ mod tests {
                 4,0,0,0,
                 2,4,8,0
             ]);
-            
+
             let expected = [
                 0,0,0,0,
                 0,0,0,0,
@@ -665,7 +665,7 @@ mod tests {
             ];
 
             game.slide(Directions::Down);
-            
+
             assert_eq!(game.as_array(), expected, "Joined unequal squares");
         }
 
@@ -677,7 +677,7 @@ mod tests {
                 2,2,2,0,
                 2,2,4,0
             ]);
-            
+
             let expected = [
                 0,0,0,0,
                 0,0,0,0,
@@ -686,7 +686,7 @@ mod tests {
             ];
 
             game.slide(Directions::Down);
-            
+
             assert_eq!(game.as_array(), expected, "Joined multiple times.");
         }
     }
@@ -702,7 +702,7 @@ mod tests {
                 8,0,0,8,
                 0,0,0,0
             ]);
-            
+
             let expected = [
                 4,0,0,0,
                 8,0,0,0,
@@ -711,7 +711,7 @@ mod tests {
             ];
 
             game.slide(Directions::Left);
-            
+
             assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Did not properly join equal squares. (0 square gap)");
             assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Did not properly join equal squares. (1 square gap)");
             assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Did not properly join equal squares. (2 square gap)");
@@ -726,7 +726,7 @@ mod tests {
                 0,0,0,0,
                 0,0,0,0
             ]);
-            
+
             let expected = [
                 8,4,0,0,
                 4,4,0,0,
@@ -735,7 +735,7 @@ mod tests {
             ];
 
             game.slide(Directions::Left);
-            
+
             assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Did not properly join multiple same row equal squares. (Two distinct pairs)");
             assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Did not properly join multiple same row equal squares. (Two identical pairs)");
             assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Unexpected square modification");
@@ -750,7 +750,7 @@ mod tests {
                 8,0,0,16,
                 0,0,0,0
             ]);
-            
+
             let expected = [
                 2,4,0,0,
                 4,8,0,0,
@@ -759,7 +759,7 @@ mod tests {
             ];
 
             game.slide(Directions::Left);
-            
+
             assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Joined unequal squares. (0 square gap)");
             assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Joined unequal squares. (1 square gap)");
             assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Joined unequal squares. (2 square gap)");
@@ -774,7 +774,7 @@ mod tests {
                 4,2,2,0,
                 0,0,0,0
             ]);
-            
+
             let expected = [
                 4,4,0,0,
                 4,4,0,0,
@@ -783,7 +783,7 @@ mod tests {
             ];
 
             game.slide(Directions::Left);
-            
+
             assert_eq!(game.as_array()[0 .. 4], expected[0 .. 4], "Joined multiple times.");
             assert_eq!(game.as_array()[4 .. 8], expected[4 .. 8], "Joined multiple times.");
             assert_eq!(game.as_array()[8 .. 12], expected[8 .. 12], "Joined multiple times.");
