@@ -1,7 +1,7 @@
 mod no_empty_error;
 
-use rand::prelude::*;
 pub use no_empty_error::NoEmptyError;
+use rand::prelude::*;
 
 pub const BOARD_SIZE: usize = 4;
 
@@ -23,7 +23,7 @@ pub enum Directions {
 pub trait Model: From<MatrixBoard> + From<ArrayBoard> {
     fn new() -> Self;
 
-    fn slide(&mut self, direction: Directions);
+    fn slide(&mut self, direction: Directions) -> bool;
 
     fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError>;
 

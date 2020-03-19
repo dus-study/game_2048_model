@@ -103,13 +103,15 @@ impl Model for Matrix {
     // / ]);
     // / ```
     // /
-    fn slide(&mut self, direction: Directions) {
+    fn slide(&mut self, direction: Directions) -> bool {
+        let old_board = self.board.clone();
         match direction {
             Directions::Up => self.slide_up(),
             Directions::Right => self.slide_right(),
             Directions::Down => self.slide_down(),
             Directions::Left => self.slide_left(),
         }
+        old_board != self.board
     }
 
     fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError> {
@@ -463,6 +465,36 @@ mod tests {
     mod slide_up {
         use super::{Directions, Matrix, Model};
 
+        #[test]
+        fn no_change() {
+            #[rustfmt::skip]
+            let mut game = Matrix::from([
+                0,1,0,0,
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0
+            ]);
+            let expected = false;
+
+            let actual = game.slide(Directions::Up);
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn yes_change() {
+            #[rustfmt::skip]
+            let mut game = Matrix::from([
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0,
+                4,3,2,1
+            ]);
+            let expected = true;
+
+            let actual = game.slide(Directions::Up);
+            assert_eq!(actual, expected);
+        }
+
         #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
@@ -554,6 +586,36 @@ mod tests {
 
     mod slide_right {
         use super::{Directions, Matrix, Model};
+
+        #[test]
+        fn no_change() {
+            #[rustfmt::skip]
+            let mut game = Matrix::from([
+                0,0,0,0,
+                0,0,0,1,
+                0,0,0,0,
+                0,0,0,0
+            ]);
+            let expected = false;
+
+            let actual = game.slide(Directions::Right);
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn yes_change() {
+            #[rustfmt::skip]
+            let mut game = Matrix::from([
+                1,0,0,0,
+                2,0,0,0,
+                3,0,0,0,
+                4,0,0,0
+            ]);
+            let expected = true;
+
+            let actual = game.slide(Directions::Right);
+            assert_eq!(actual, expected);
+        }
 
         #[rustfmt::skip]
         #[test]
@@ -647,6 +709,36 @@ mod tests {
     mod slide_down {
         use super::{Directions, Matrix, Model};
 
+        #[test]
+        fn no_change() {
+            #[rustfmt::skip]
+            let mut game = Matrix::from([
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0,
+                0,1,0,0
+            ]);
+            let expected = false;
+
+            let actual = game.slide(Directions::Down);
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn yes_change() {
+            #[rustfmt::skip]
+            let mut game = Matrix::from([
+                1,2,3,4,
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0
+            ]);
+            let expected = true;
+
+            let actual = game.slide(Directions::Down);
+            assert_eq!(actual, expected);
+        }
+
         #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
@@ -738,6 +830,36 @@ mod tests {
 
     mod slide_left {
         use super::{Directions, Matrix, Model};
+
+        #[test]
+        fn no_change() {
+            #[rustfmt::skip]
+            let mut game = Matrix::from([
+                0,0,0,0,
+                0,0,0,0,
+                1,0,0,0,
+                0,0,0,0
+            ]);
+            let expected = false;
+
+            let actual = game.slide(Directions::Left);
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn yes_change() {
+            #[rustfmt::skip]
+            let mut game = Matrix::from([
+                0,0,0,1,
+                0,0,0,2,
+                0,0,0,3,
+                0,0,0,4
+            ]);
+            let expected = true;
+
+            let actual = game.slide(Directions::Left);
+            assert_eq!(actual, expected);
+        }
 
         #[rustfmt::skip]
         #[test]
