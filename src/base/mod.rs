@@ -23,7 +23,7 @@ pub enum Directions {
 pub trait Model: From<MatrixBoard> + From<ArrayBoard> {
     fn new() -> Self;
 
-    fn slide(&mut self, direction: Directions) -> bool;
+    fn slide(&mut self, direction: Directions) -> Option<bool>;
 
     fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError>;
 

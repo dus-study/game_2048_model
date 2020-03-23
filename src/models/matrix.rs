@@ -103,7 +103,7 @@ impl Model for Matrix {
     // / ]);
     // / ```
     // /
-    fn slide(&mut self, direction: Directions) -> bool {
+    fn slide(&mut self, direction: Directions) -> Option<bool> {
         let old_board = self.board.clone();
         match direction {
             Directions::Up => self.slide_up(),
@@ -111,7 +111,11 @@ impl Model for Matrix {
             Directions::Down => self.slide_down(),
             Directions::Left => self.slide_left(),
         }
-        old_board != self.board
+        if old_board != self.board {
+            Some(true)
+        } else {
+            None
+        }
     }
 
     fn random<R: Rng>(&mut self, rng: &mut R) -> Result<(), NoEmptyError> {
@@ -466,7 +470,7 @@ mod tests {
         use super::{Directions, Matrix, Model};
 
         #[test]
-        fn no_change() {
+        fn not_changed_after_move() {
             #[rustfmt::skip]
             let mut game = Matrix::from([
                 0,1,0,0,
@@ -474,25 +478,29 @@ mod tests {
                 0,0,0,0,
                 0,0,0,0
             ]);
-            let expected = false;
+            let expected = game.board.clone();
 
-            let actual = game.slide(Directions::Up);
-            assert_eq!(actual, expected);
+            let has_moved = game.slide(Directions::Up);
+
+            assert_eq!(game.board, expected);
+            assert!(has_moved.is_none())
         }
 
         #[test]
-        fn yes_change() {
+        fn changed_after_move() {
             #[rustfmt::skip]
             let mut game = Matrix::from([
                 0,0,0,0,
                 0,0,0,0,
                 0,0,0,0,
-                4,3,2,1
+                1,2,3,4
             ]);
-            let expected = true;
+            let expected = game.board.clone();
 
-            let actual = game.slide(Directions::Up);
-            assert_eq!(actual, expected);
+            let has_moved = game.slide(Directions::Up);
+
+            assert_ne!(game.board, expected);
+            assert!(!has_moved.is_none())
         }
 
         #[rustfmt::skip]
@@ -588,7 +596,7 @@ mod tests {
         use super::{Directions, Matrix, Model};
 
         #[test]
-        fn no_change() {
+        fn not_changed_after_move() {
             #[rustfmt::skip]
             let mut game = Matrix::from([
                 0,0,0,0,
@@ -596,14 +604,16 @@ mod tests {
                 0,0,0,0,
                 0,0,0,0
             ]);
-            let expected = false;
+            let expected = game.board.clone();
 
-            let actual = game.slide(Directions::Right);
-            assert_eq!(actual, expected);
+            let has_moved = game.slide(Directions::Right);
+
+            assert_eq!(game.board, expected);
+            assert!(has_moved.is_none())
         }
 
         #[test]
-        fn yes_change() {
+        fn changed_after_move() {
             #[rustfmt::skip]
             let mut game = Matrix::from([
                 1,0,0,0,
@@ -611,10 +621,12 @@ mod tests {
                 3,0,0,0,
                 4,0,0,0
             ]);
-            let expected = true;
+            let expected = game.board.clone();
 
-            let actual = game.slide(Directions::Right);
-            assert_eq!(actual, expected);
+            let has_moved = game.slide(Directions::Right);
+
+            assert_ne!(game.board, expected);
+            assert!(!has_moved.is_none())
         }
 
         #[rustfmt::skip]
@@ -710,22 +722,24 @@ mod tests {
         use super::{Directions, Matrix, Model};
 
         #[test]
-        fn no_change() {
+        fn not_changed_after_move() {
             #[rustfmt::skip]
             let mut game = Matrix::from([
                 0,0,0,0,
                 0,0,0,0,
                 0,0,0,0,
-                0,1,0,0
+                0,0,1,0
             ]);
-            let expected = false;
+            let expected = game.board.clone();
 
-            let actual = game.slide(Directions::Down);
-            assert_eq!(actual, expected);
+            let has_moved = game.slide(Directions::Down);
+
+            assert_eq!(game.board, expected);
+            assert!(has_moved.is_none())
         }
 
         #[test]
-        fn yes_change() {
+        fn changed_after_move() {
             #[rustfmt::skip]
             let mut game = Matrix::from([
                 1,2,3,4,
@@ -733,10 +747,12 @@ mod tests {
                 0,0,0,0,
                 0,0,0,0
             ]);
-            let expected = true;
+            let expected = game.board.clone();
 
-            let actual = game.slide(Directions::Down);
-            assert_eq!(actual, expected);
+            let has_moved = game.slide(Directions::Down);
+
+            assert_ne!(game.board, expected);
+            assert!(!has_moved.is_none())
         }
 
         #[rustfmt::skip]
@@ -832,7 +848,7 @@ mod tests {
         use super::{Directions, Matrix, Model};
 
         #[test]
-        fn no_change() {
+        fn not_changed_after_move() {
             #[rustfmt::skip]
             let mut game = Matrix::from([
                 0,0,0,0,
@@ -840,14 +856,16 @@ mod tests {
                 1,0,0,0,
                 0,0,0,0
             ]);
-            let expected = false;
+            let expected = game.board.clone();
 
-            let actual = game.slide(Directions::Left);
-            assert_eq!(actual, expected);
+            let has_moved = game.slide(Directions::Left);
+
+            assert_eq!(game.board, expected);
+            assert!(has_moved.is_none())
         }
 
         #[test]
-        fn yes_change() {
+        fn changed_after_move() {
             #[rustfmt::skip]
             let mut game = Matrix::from([
                 0,0,0,1,
@@ -855,10 +873,12 @@ mod tests {
                 0,0,0,3,
                 0,0,0,4
             ]);
-            let expected = true;
+            let expected = game.board.clone();
 
-            let actual = game.slide(Directions::Left);
-            assert_eq!(actual, expected);
+            let has_moved = game.slide(Directions::Left);
+
+            assert_ne!(game.board, expected);
+            assert!(!has_moved.is_none())
         }
 
         #[rustfmt::skip]
