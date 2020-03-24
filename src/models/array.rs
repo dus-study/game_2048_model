@@ -223,7 +223,8 @@ impl Model for ArrayModel {
     /// ]);
     /// ```
     ///
-    fn slide(&mut self, direction: Directions) {
+    fn slide(&mut self, direction: Directions) -> Option<bool> {
+        let old_board = self.board.clone();
         match direction {
             Directions::Up => {
                 ArrayModel::shift(&mut self.board, UP_INDEX);
@@ -245,6 +246,11 @@ impl Model for ArrayModel {
                 ArrayModel::merge(&mut self.board, LEFT_INDEX);
                 ArrayModel::shift(&mut self.board, LEFT_INDEX);
             }
+        }
+        if old_board != self.board {
+            Some(true)
+        } else {
+            None
         }
     }
 
@@ -464,6 +470,40 @@ mod tests {
     mod slide_up {
         use super::{ArrayModel, Directions, Model};
 
+        #[test]
+        fn not_changed_after_move() {
+            #[rustfmt::skip]
+            let mut game = ArrayModel::from([
+                0,1,0,0,
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0
+            ]);
+            let expected = game.board.clone();
+
+            let has_moved = game.slide(Directions::Up);
+
+            assert_eq!(game.board, expected);
+            assert!(has_moved.is_none())
+        }
+
+        #[test]
+        fn changed_after_move() {
+            #[rustfmt::skip]
+            let mut game = ArrayModel::from([
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0,
+                1,2,3,4
+            ]);
+            let expected = game.board.clone();
+
+            let has_moved = game.slide(Directions::Up);
+
+            assert_ne!(game.board, expected);
+            assert!(!has_moved.is_none())
+        }
+
         #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
@@ -555,6 +595,40 @@ mod tests {
 
     mod move_right {
         use super::{ArrayModel, Directions, Model};
+
+        #[test]
+        fn not_changed_after_move() {
+            #[rustfmt::skip]
+            let mut game = ArrayModel::from([
+                0,0,0,0,
+                0,0,0,1,
+                0,0,0,0,
+                0,0,0,0
+            ]);
+            let expected = game.board.clone();
+
+            let has_moved = game.slide(Directions::Right);
+
+            assert_eq!(game.board, expected);
+            assert!(has_moved.is_none())
+        }
+
+        #[test]
+        fn changed_after_move() {
+            #[rustfmt::skip]
+            let mut game = ArrayModel::from([
+                1,0,0,0,
+                2,0,0,0,
+                3,0,0,0,
+                4,0,0,0
+            ]);
+            let expected = game.board.clone();
+
+            let has_moved = game.slide(Directions::Right);
+
+            assert_ne!(game.board, expected);
+            assert!(!has_moved.is_none())
+        }
 
         #[rustfmt::skip]
         #[test]
@@ -648,6 +722,40 @@ mod tests {
     mod slide_down {
         use super::{ArrayModel, Directions, Model};
 
+        #[test]
+        fn not_changed_after_move() {
+            #[rustfmt::skip]
+            let mut game = ArrayModel::from([
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0,
+                0,0,1,0
+            ]);
+            let expected = game.board.clone();
+
+            let has_moved = game.slide(Directions::Down);
+
+            assert_eq!(game.board, expected);
+            assert!(has_moved.is_none())
+        }
+
+        #[test]
+        fn changed_after_move() {
+            #[rustfmt::skip]
+            let mut game = ArrayModel::from([
+                1,2,3,4,
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0
+            ]);
+            let expected = game.board.clone();
+
+            let has_moved = game.slide(Directions::Down);
+
+            assert_ne!(game.board, expected);
+            assert!(!has_moved.is_none())
+        }
+
         #[rustfmt::skip]
         #[test]
         fn join_equal_squares() {
@@ -739,6 +847,40 @@ mod tests {
 
     mod slide_left {
         use super::{ArrayModel, Directions, Model};
+
+        #[test]
+        fn not_changed_after_move() {
+            #[rustfmt::skip]
+            let mut game = ArrayModel::from([
+                0,0,0,0,
+                0,0,0,0,
+                1,0,0,0,
+                0,0,0,0
+            ]);
+            let expected = game.board.clone();
+
+            let has_moved = game.slide(Directions::Left);
+
+            assert_eq!(game.board, expected);
+            assert!(has_moved.is_none())
+        }
+
+        #[test]
+        fn changed_after_move() {
+            #[rustfmt::skip]
+            let mut game = ArrayModel::from([
+                0,0,0,1,
+                0,0,0,2,
+                0,0,0,3,
+                0,0,0,4
+            ]);
+            let expected = game.board.clone();
+
+            let has_moved = game.slide(Directions::Left);
+
+            assert_ne!(game.board, expected);
+            assert!(!has_moved.is_none())
+        }
 
         #[rustfmt::skip]
         #[test]
